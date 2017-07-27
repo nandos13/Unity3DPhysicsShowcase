@@ -11,6 +11,6 @@ public class createRopeMenuItem
         GameObject selected = Selection.activeGameObject;
         if (selected != null)   Debug.Log("Creating rope attached to : " + selected.name);
 
-        RopeCreator.CreateNewRope(Vector3.zero, selected);
+        RopeController.CreateNewRope(Vector3.zero, selected);
     }
 }
