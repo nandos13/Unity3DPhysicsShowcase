@@ -48,7 +48,7 @@ public class RopeController : MonoBehaviour
         }
 
         // Set line renderer to draw over these segments
-        _line.numPositions = _positionCache.Count;
+        _line.positionCount = _positionCache.Count;
         _line.SetPositions(_positionCache.ToArray());
 	}
 
