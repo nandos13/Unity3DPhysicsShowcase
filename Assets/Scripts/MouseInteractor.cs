@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class MouseInteractor : MonoBehaviour
 {
@@ -32,7 +33,9 @@ public class MouseInteractor : MonoBehaviour
         // Was something hit?
         if (hitInfo.transform)
         {
-            hitInfo.transform.SendMessageUpwards("Interact", SendMessageOptions.DontRequireReceiver);
+            IInteractable i = hitInfo.transform.GetComponentInParent<IInteractable>();
+            if (i != null)
+                i.Interact();
         }
     }
 }

@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Exploder : MonoBehaviour
+public class Exploder : MonoBehaviour, IInteractable
 {
 
     [Range(10, 1000), SerializeField]    private float _force = 500;
     [Range(1, 100), SerializeField]    private float _radius = 10;
 
-    public void Explode()
+    private void Explode()
     {
         Debug.Log("Exploding", this);
 
@@ -25,7 +25,7 @@ public class Exploder : MonoBehaviour
         }
     }
 
-    private void Interact()
+    public void Interact()
     {
         Explode();
     }
