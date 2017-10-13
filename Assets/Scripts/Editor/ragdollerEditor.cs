@@ -9,6 +9,7 @@ public class ragdollerEditor : Editor
 {
 
     private ReorderableList _pieceList = null;
+    private bool _showList = true;
 
     private void OnEnable()
     {
@@ -22,6 +23,20 @@ public class ragdollerEditor : Editor
         _pieceList.drawHeaderCallback = (Rect rect) => { EditorGUI.LabelField(rect, "Pieces"); };
 
         _pieceList.elementHeight = singleLineHeightDoubled + singleLineHeightDoubled + singleLineHeight + 4;
+        _pieceList.elementHeightCallback =
+            (int index) =>
+            {
+                SerializedProperty element = _pieceList.serializedProperty.GetArrayElementAtIndex(index);
+                if (element != null)
+                {
+                    SerializedProperty shape = element.FindPropertyRelative("_shape");
+                    if (shape != null)
+                        return singleLineHeightDoubled + singleLineHeightDoubled + 4 + ((shape.enumValueIndex == 1) ? singleLineHeight : 0);
+                    else
+                        return 1;
+                }
+                return 1;
+            };
 
         _pieceList.drawElementCallback =
             (Rect rect, int index, bool isActive, bool isFocused) =>
@@ -82,9 +97,14 @@ public class ragdollerEditor : Editor
         serializedObject.Update();
 
         EditorGUILayout.Space();
+        
+        // Create a toggle for displaying list
+        _showList = EditorGUILayout.Toggle(_showList);
+        Rect labelRect = GUILayoutUtility.GetLastRect();
+        EditorGUI.LabelField(new Rect(labelRect.x + 16, labelRect.y, labelRect.width - 16, labelRect.height),
+                                    "Show Pieces List");
 
-        // Draw list
-        if (_pieceList != null)
+        if (_showList && _pieceList != null)
             _pieceList.DoLayoutList();
 
         SerializedProperty startRagdolled = serializedObject.FindProperty("_startRagdolled");

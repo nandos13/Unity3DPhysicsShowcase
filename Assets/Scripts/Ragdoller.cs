@@ -31,6 +31,7 @@ public class Ragdoller : MonoBehaviour
                             new List<RagdollBodyPiece>();
 
     [SerializeField]    private bool _startRagdolled = false;
+    private bool _currentRagdollState = false;
 
     private List<Rigidbody> _rigidbodyComponents = new List<Rigidbody>();
 
@@ -62,10 +63,6 @@ public class Ragdoller : MonoBehaviour
             // Let body piece track it's collider
             p.collider = c;
         }
-
-        // Attach pieces to parent pieces via joints
-        foreach (RagdollBodyPiece p in _pieces)
-            AddPart(p);
     }
 
     void Start()
@@ -161,14 +158,26 @@ public class Ragdoller : MonoBehaviour
 
     public void EnableRagdoll()
     {
-        foreach (Rigidbody rb in _rigidbodyComponents)
-            rb.isKinematic = false;
+        // Attach pieces to parent pieces via joints
+        foreach (RagdollBodyPiece p in _pieces)
+            AddPart(p);
+
+        _currentRagdollState = true;
     }
 
     public void DisableRagdoll()
     {
+        _currentRagdollState = false;
         foreach (Rigidbody rb in _rigidbodyComponents)
-            rb.isKinematic = true;
+            Destroy(rb);
+    }
+
+    public void ToggleRagdollState()
+    {
+        if (_currentRagdollState)
+            DisableRagdoll();
+        else
+            EnableRagdoll();
     }
 
     void OnDrawGizmosSelected()
