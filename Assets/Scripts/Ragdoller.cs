@@ -11,6 +11,8 @@ public class Ragdoller : MonoBehaviour
 
         public COLLIDERTYPE _shape;
 
+        public RagdollBodyPiece _parent = null;
+
         public Transform _piece = null;
 
         public Vector3 _offset = new Vector3();
@@ -25,44 +27,24 @@ public class Ragdoller : MonoBehaviour
             get { return _collider; }
             set { _collider = value; }
         }
+
+        public CharacterJoint _joint = null;
     }
 
-    [SerializeField]    private List<RagdollBodyPiece> _pieces = 
-                            new List<RagdollBodyPiece>();
+    [SerializeField]
+    private List<RagdollBodyPiece> _pieces = new List<RagdollBodyPiece>();
 
-    [SerializeField]    private bool _startRagdolled = false;
+    [SerializeField]
+    private bool _startRagdolled = false;
     private bool _currentRagdollState = false;
 
     private List<Rigidbody> _rigidbodyComponents = new List<Rigidbody>();
 
+    private Rigidbody topRB = null;
+
     void Awake()
     {
-        // Create colliders for each body piece
-        for (int i = 0; i < _pieces.Count; i++)
-        {
-            // Get this piece
-            RagdollBodyPiece p = _pieces[i];
-
-            // Check piece is valid
-            if (p == null)
-            {
-                _pieces.RemoveAt(i);
-                i--;
-                continue;
-            }
-            if (p._piece == null)
-            {
-                _pieces.RemoveAt(i);
-                i--;
-                continue;
-            }
-
-            // Generate collider
-            Collider c = GenerateCollider(p);
-
-            // Let body piece track it's collider
-            p.collider = c;
-        }
+        topRB = GetComponentInParent<Rigidbody>();
     }
 
     void Start()
@@ -71,6 +53,18 @@ public class Ragdoller : MonoBehaviour
             EnableRagdoll();
         else
             DisableRagdoll();
+    }
+
+    private Transform TopRagdollPiece()
+    {
+        if (_pieces.Count == 0)
+            return null;
+
+        RagdollBodyPiece p = _pieces[0];
+        while (p._parent != null)
+            p = p._parent;
+
+        return p._piece;
     }
 
     private Collider GenerateCollider(RagdollBodyPiece p)
@@ -132,6 +126,8 @@ public class Ragdoller : MonoBehaviour
 
         if (parentPiece != null)
         {
+            p._parent = parentPiece;
+
             // Get parent's collider
             Collider parentCollider = parentPiece.collider;
             Rigidbody parentRB = parentPiece._piece.gameObject.GetComponent<Rigidbody>();
@@ -145,6 +141,7 @@ public class Ragdoller : MonoBehaviour
             // Add a character joint
             CharacterJoint j = p._piece.gameObject.AddComponent<CharacterJoint>();
             j.connectedBody = parentRB;
+            p._joint = j;
 
             // Track rigidbody
             Rigidbody thisRB = p._piece.gameObject.GetComponent<Rigidbody>();
@@ -158,18 +155,67 @@ public class Ragdoller : MonoBehaviour
 
     public void EnableRagdoll()
     {
-        // Attach pieces to parent pieces via joints
-        foreach (RagdollBodyPiece p in _pieces)
-            AddPart(p);
+        if (topRB)
+            topRB.isKinematic = true;
 
-        _currentRagdollState = true;
+        if (_currentRagdollState == false)
+        {
+            // Create colliders for each body piece
+            for (int i = 0; i < _pieces.Count; i++)
+            {
+                // Get this piece
+                RagdollBodyPiece p = _pieces[i];
+
+                // Check piece is valid
+                if (p == null)
+                {
+                    _pieces.RemoveAt(i);
+                    i--;
+                    continue;
+                }
+                if (p._piece == null)
+                {
+                    _pieces.RemoveAt(i);
+                    i--;
+                    continue;
+                }
+
+                // Generate collider
+                Collider c = GenerateCollider(p);
+
+                // Let body piece track it's collider
+                p.collider = c;
+            }
+
+            // Attach pieces to parent pieces via joints
+            foreach (RagdollBodyPiece p in _pieces)
+                AddPart(p);
+
+            _currentRagdollState = true;
+        }
     }
 
     public void DisableRagdoll()
     {
-        _currentRagdollState = false;
-        foreach (Rigidbody rb in _rigidbodyComponents)
-            Destroy(rb);
+        if (topRB)
+            topRB.isKinematic = false;
+
+        if (_currentRagdollState == true)
+        {
+            foreach (RagdollBodyPiece p in _pieces)
+            {
+                Destroy(p.collider);
+                Destroy(p._joint);
+            }
+
+            _currentRagdollState = false;
+            foreach (Rigidbody rb in _rigidbodyComponents)
+                Destroy(rb);
+        }
+
+        Transform topPiece = TopRagdollPiece();
+        if (topPiece != null)
+            transform.position = topPiece.position;
     }
 
     public void ToggleRagdollState()
