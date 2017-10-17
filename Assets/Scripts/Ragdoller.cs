@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityStandardAssets.Characters.ThirdPerson;
 
 public class Ragdoller : MonoBehaviour
 {
@@ -42,8 +43,14 @@ public class Ragdoller : MonoBehaviour
 
     private Rigidbody topRB = null;
 
+    private ThirdPersonUserControl userControl = null;
+    private Animator animator = null;
+
     void Awake()
     {
+        userControl = GetComponentInChildren<ThirdPersonUserControl>();
+        Animator animator = GetComponentInChildren<Animator>();
+
         topRB = GetComponentInParent<Rigidbody>();
     }
 
@@ -160,6 +167,16 @@ public class Ragdoller : MonoBehaviour
 
         if (_currentRagdollState == false)
         {
+            if (userControl)
+            {
+                userControl.Character.Move(Vector3.zero, false, false);
+                userControl.enabled = false;
+                userControl.Character.enabled = false;
+            }
+
+            if (animator)
+                animator.enabled = false;
+
             // Create colliders for each body piece
             for (int i = 0; i < _pieces.Count; i++)
             {
@@ -202,6 +219,16 @@ public class Ragdoller : MonoBehaviour
 
         if (_currentRagdollState == true)
         {
+            if (userControl)
+            {
+                userControl.enabled = true;
+                userControl.Character.enabled = true;
+            }
+
+            if (animator)
+                animator.enabled = true;
+
+            // Destroy all ragdoll colliders and joints
             foreach (RagdollBodyPiece p in _pieces)
             {
                 Destroy(p.collider);
@@ -224,6 +251,26 @@ public class Ragdoller : MonoBehaviour
             DisableRagdoll();
         else
             EnableRagdoll();
+    }
+
+    public void SetRagdollState(bool state)
+    {
+        if (state)
+            EnableRagdoll();
+        else
+            DisableRagdoll();
+    }
+
+    public void RagdollForSeconds(float seconds)
+    {
+        StartCoroutine(TimedRagdoll(seconds));
+    }
+
+    private IEnumerator TimedRagdoll(float seconds)
+    {
+        SetRagdollState(true);
+        yield return new WaitForSeconds(seconds);
+        SetRagdollState(false);
     }
 
     void OnDrawGizmosSelected()
