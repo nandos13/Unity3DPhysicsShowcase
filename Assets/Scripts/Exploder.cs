@@ -5,8 +5,12 @@ using UnityEngine;
 public class Exploder : MonoBehaviour, IInteractable
 {
 
-    [Range(10, 1000), SerializeField]    private float _force = 500;
-    [Range(1, 100), SerializeField]    private float _radius = 10;
+    [Range(10, 1000), SerializeField]
+    private float _force = 500;
+    [Range(1, 100), SerializeField]
+    private float _radius = 10;
+    [Range(0.0f, 10.0f), SerializeField]
+    private float _upModifier = 5.0f;
 
     private void Explode()
     {
@@ -21,16 +25,11 @@ public class Exploder : MonoBehaviour, IInteractable
             Rigidbody rb = c.GetComponent<Rigidbody>();
 
             if (rb != null)
-                rb.AddExplosionForce(_force, transform.position, _radius);
+                rb.AddExplosionForce(_force, transform.position, _radius, _upModifier);
         }
     }
 
-    public void Interact()
-    {
-        Explode();
-    }
-
-    void OnTriggerEnter()
+    void IInteractable.Interact()
     {
         Explode();
     }

@@ -48,6 +48,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             // read inputs
             float h = Input.GetAxis("Horizontal");
             float v = Input.GetAxis("Vertical");
+            v = Mathf.Clamp01(v);
             bool crouch = Input.GetKey(KeyCode.C);
 
             // calculate move direction to pass to character
