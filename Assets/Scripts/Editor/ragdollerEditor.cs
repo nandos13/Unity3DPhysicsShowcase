@@ -105,7 +105,10 @@ public class ragdollerEditor : Editor
                                     "Show Pieces List");
 
         if (_showList && _pieceList != null)
+        {
+            EditorGUILayout.HelpBox("Note:\nCollider scene gizmos only display correctly when the gameobject's rotation is at Euler(0, 0, 0). The Ragdoller script's OnDrawGizmosSelected function needs to apply the correct matrix to the Gizmos class before drawing in order to fix this. This will be done later, but works well enough now to not worry about it.", MessageType.Info);
             _pieceList.DoLayoutList();
+        }
 
         SerializedProperty startRagdolled = serializedObject.FindProperty("_startRagdolled");
         if (startRagdolled != null)

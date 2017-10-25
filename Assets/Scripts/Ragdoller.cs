@@ -49,7 +49,7 @@ public class Ragdoller : MonoBehaviour
     void Awake()
     {
         userControl = GetComponentInChildren<ThirdPersonUserControl>();
-        Animator animator = GetComponentInChildren<Animator>();
+        animator = GetComponentInChildren<Animator>();
 
         topRB = GetComponentInParent<Rigidbody>();
     }
