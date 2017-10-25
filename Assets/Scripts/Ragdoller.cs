@@ -232,6 +232,7 @@ public class Ragdoller : MonoBehaviour
             foreach (RagdollBodyPiece p in _pieces)
             {
                 Destroy(p.collider);
+                Destroy(p.collider.gameObject);
                 Destroy(p._joint);
             }
 

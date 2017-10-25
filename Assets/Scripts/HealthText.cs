@@ -12,10 +12,10 @@ public class HealthText : MonoBehaviour
 
         Health health = FindObjectOfType<Health>();
         if (health)
-            health.OnDamage += OnDamage;
+            health.OnHealthValueChanged += OnHealthValueChanged;
     }
 
-    private void OnDamage(Health sender)
+    private void OnHealthValueChanged(Health sender)
     {
         if (text)
         {
